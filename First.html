@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Checkout — Payment Mode</title>
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; padding: 24px; background:#f7f7fb; color:#111;}
+    .card { background:#fff; border-radius:12px; padding:20px; max-width:720px; margin:auto; box-shadow:0 6px 18px rgba(15,15,30,0.06); }
+    h1 { font-size:20px; margin:0 0 12px; }
+    p.lead { color:#555; margin-top:0; }
+    fieldset { border:0; padding:0; margin:12px 0; }
+    .payment-options { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+    .option { background:#f1f4ff; padding:10px 14px; border-radius:8px; cursor:pointer; display:flex; gap:10px; align-items:center; border:2px solid transparent; }
+    .option input { margin-right:8px; }
+    .option:focus-within, .option.selected { border-color:#3b82f6; background:#eef6ff; }
+    .method-fields { margin-top:10px; }
+    label { display:block; margin-bottom:6px; font-size:14px; color:#222; }
+    input[type="text"], input[type="number"], input[type="tel"], input[type="email"], select {
+      width:100%; padding:10px; border-radius:8px; border:1px solid #d6d9e6; outline:none; box-sizing:border-box;
+    }
+    .row { display:flex; gap:12px; }
+    .row > * { flex:1; }
+    .hidden { display:none; }
+    .note { font-size:13px; color:#666; margin-top:8px; }
+    .actions { margin-top:18px; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    button { background:#2563eb; color:white; border:0; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600; }
+    button.secondary { background:#e6eefc; color:#0b63d6; font-weight:600; }
+    .error { color:#b91c1c; font-size:13px; margin-top:6px; }
+    small { color:#666; }
+  </style>
+</head>
+<body>
+  <div class="card" role="region" aria-labelledby="checkoutHeading">
+    <h1 id="checkoutHeading">Checkout — Payment</h1>
+    <p class="lead">Choose a payment method and enter the required details.</p>
+
+    <form id="paymentForm" novalidate>
+      <fieldset aria-label="Payment methods">
+        <legend class="sr-only">Select payment method</legend>
+
+        <div class="payment-options" role="radiogroup" aria-labelledby="checkoutHeading">
+          <label class="option" id="opt-card">
+            <input type="radio" name="payment" value="card" aria-label="Credit or Debit Card" />
+            <div>
+              <strong>Card</strong><br><small>Visa, MasterCard, Rupay</small>
+            </div>
+          </label>
+
+          <label class="option" id="opt-netbanking">
+            <input type="radio" name="payment" value="netbanking" aria-label="Netbanking" />
+            <div>
+              <strong>Netbanking</strong><br><small>Internet banking (IMPS/NEFT)</small>
+            </div>
+          </label>
+
+          <label class="option" id="opt-upi">
+            <input type="radio" name="payment" value="upi" aria-label="UPI" />
+            <div>
+              <strong>UPI</strong><br><small>PhonePe / Google Pay / Paytm</small>
+            </div>
+          </label>
+
+          <label class="option" id="opt-wallet">
+            <input type="radio" name="payment" value="wallet" aria-label="Digital Wallet" />
+            <div>
+              <strong>Wallet</strong><br><small>Paytm / Mobikwik</small>
+            </div>
+          </label>
+
+          <label class="option" id="opt-cod">
+            <input type="radio" name="payment" value="cod" aria-label="Cash on Delivery" />
+            <div>
+              <strong>Cash on Delivery</strong><br><small>Pay when delivered</small>
+            </div>
+          </label>
+        </div>
+      </fieldset>
+
+      <!-- Card fields -->
+      <div id="fields-card" class="method-fields hidden" aria-hidden="true">
+        <label for="cardName">Name on card</label>
+        <input id="cardName" name="cardName" type="text" placeholder="Full name as on card" />
+
+        <label for="cardNumber">Card number</label>
+        <input id="cardNumber" name="cardNumber" type="text" inputmode="numeric" maxlength="19" placeholder="1234 5678 9012 3456" />
+
+        <div class="row">
+          <div>
+            <label for="expiry">Expiry (MM/YY)</label>
+            <input id="expiry" name="expiry" type="text" maxlength="5" placeholder="08/26" />
+          </div>
+          <div>
+            <label for="cvv">CVV</label>
+            <input id="cvv" name="cvv" type="password" inputmode="numeric" maxlength="4" placeholder="123" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Netbanking -->
+      <div id="fields-netbanking" class="method-fields hidden" aria-hidden="true">
+        <label for="bankSelect">Select bank</label>
+        <select id="bankSelect" name="bankSelect">
+          <option value="">-- Choose bank --</option>
+          <option>State Bank of India</option>
+          <option>HDFC Bank</option>
+          <option>ICICI Bank</option>
+          <option>Axis Bank</option>
+          <option>Other</option>
+        </select>
+        <p class="note">You will be redirected to your bank to complete payment.</p>
+      </div>
+
+      <!-- UPI -->
+      <div id="fields-upi" class="method-fields hidden" aria-hidden="true">
+        <label for="upiId">UPI ID (VPA)</label>
+        <input id="upiId" name="upiId" type="text" placeholder="example@bank or mobile@upi" />
+        <p class="note">We will request a collect/QR on your UPI app to confirm payment.</p>
+      </div>
+
+      <!-- Wallet -->
+      <div id="fields-wallet" class="method-fields hidden" aria-hidden="true">
+        <label for="walletProvider">Wallet provider</label>
+        <select id="walletProvider" name="walletProvider">
+          <option value="">-- Choose wallet --</option>
+          <option>Paytm</option>
+          <option>PhonePe</option>
+          <option>Mobikwik</option>
+        </select>
+
+        <label for="walletMobile">Mobile number linked to wallet</label>
+        <input id="walletMobile" name="walletMobile" type="tel" placeholder="10-digit mobile number" />
+      </div>
+
+      <!-- COD -->
+      <div id="fields-cod" class="method-fields hidden" aria-hidden="true">
+        <p class="note">Cash on delivery selected. Please keep exact change ready to make delivery smooth.</p>
+      </div>
+
+      <div id="formErrors" class="error" role="alert" aria-live="polite"></div>
+
+      <div class="actions">
+        <button type="submit" id="payBtn">Pay Now</button>
+        <button type="button" class="secondary" id="cancelBtn">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // Simple show/hide per method + selection visual update
+    const options = document.querySelectorAll('.payment-options .option');
+    const radios = document.querySelectorAll('input[name="payment"]');
+    const methodFields = {
+      card: document.getElementById('fields-card'),
+      netbanking: document.getElementById('fields-netbanking'),
+      upi: document.getElementById('fields-upi'),
+      wallet: document.getElementById('fields-wallet'),
+      cod: document.getElementById('fields-cod')
+    };
+    const form = document.getElementById('paymentForm');
+    const errors = document.getElementById('formErrors');
+
+    function clearSelections() {
+      options.forEach(o => o.classList.remove('selected'));
+      Object.values(methodFields).forEach(el => {
+        el.classList.add('hidden');
+        el.setAttribute('aria-hidden','true');
+      });
+    }
+
+    options.forEach(label => {
+      label.addEventListener('click', () => {
+        const input = label.querySelector('input[type=radio]');
+        input.checked = true;
+        updateUIFor(input.value);
+        input.focus();
+      });
+
+      // keyboard select support
+      label.addEventListener('keydown', (e) => {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          label.click();
+        }
+      });
+    });
+
+    radios.forEach(r => {
+      r.addEventListener('change', () => updateUIFor(r.value));
+    });
+
+    function updateUIFor(method) {
+      clearSelections();
+      // mark selected option
+      const selectedLabel = document.querySelector(.option input[value="${method}"]).closest('.option');
+      selectedLabel.classList.add('selected');
+
+      // show the method fields
+      if (methodFields[method]) {
+        methodFields[method].classList.remove('hidden');
+        methodFields[method].removeAttribute('aria-hidden');
+      }
+
+      // clear errors
+      errors.textContent = '';
+    }
+
+    // Basic validation before "submit"
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      errors.textContent = '';
+
+      const chosen = document.querySelector('input[name="payment"]:checked');
+      if (!chosen) {
+        errors.textContent = 'Please select a payment method.';
+        return;
+      }
+
+      const method = chosen.value;
+      // simplest checks per method
+      if (method === 'card') {
+        const name = document.getElementById('cardName').value.trim();
+        const cardNum = document.getElementById('cardNumber').value.replace(/\s+/g,'');
+        const expiry = document.getElementById('expiry').value.trim();
+        const cvv = document.getElementById('cvv').value.trim();
+
+        if (!name || cardNum.length < 12 || !/^\d{12,19}$/.test(cardNum) || !/^\d{2}\/\d{2}$/.test(expiry) || !/^\d{3,4}$/.test(cvv)) {
+          errors.textContent = 'Please enter valid card details (name, card number, expiry MM/YY, CVV).';
+          return;
+        }
+      } else if (method === 'netbanking') {
+        const bank = document.getElementById('bankSelect').value;
+        if (!bank) { errors.textContent = 'Please select a bank for netbanking.'; return; }
+      } else if (method === 'upi') {
+        const upi = document.getElementById('upiId').value.trim();
+        if (!upi || upi.length < 5 || !/@/.test(upi)) { errors.textContent = 'Please enter a valid UPI ID (example@bank).'; return; }
+      } else if (method === 'wallet') {
+        const wallet = document.getElementById('walletProvider').value;
+        const mobile = document.getElementById('walletMobile').value.replace(/\D/g,'');
+        if (!wallet || mobile.length !== 10) { errors.textContent = 'Please choose wallet and enter 10-digit mobile number.'; return; }
+      } else if (method === 'cod') {
+        // no validation needed
+      }
+
+      // Simulate success message and payload
+      const payload = {
+        method: method,
+        timestamp: new Date().toISOString()
+      };
+      alert('Payment initiated: ' + JSON.stringify(payload, null, 2));
+      // In real app: send payload to server and redirect to payment gateway / show success page
+      form.reset();
+      clearSelections();
+    });
+
+    document.getElementById('cancelBtn').addEventListener('click', () => {
+      if (confirm('Cancel checkout and return to cart?')) {
+        window.history.back();
+      }
+    });
+
+    // Accessibility: allow using arrow keys to move between options
+    document.querySelector('.payment-options').addEventListener('keydown', (e) => {
+      const keys = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'];
+      if (!keys.includes(e.key)) return;
+      e.preventDefault();
+      const radiosArray = Array.from(document.querySelectorAll('input[name="payment"]'));
+      const idx = radiosArray.findIndex(r => r.checked);
+      let newIdx = idx;
+      if (idx === -1) newIdx = 0;
+      else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') newIdx = (idx + 1) % radiosArray.length;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') newIdx = (idx - 1 + radiosArray.length) % radiosArray.length;
+      radiosArray[newIdx].checked = true;
+      updateUIFor(radiosArray[newIdx].value);
+      radiosArray[newIdx].focus();
+    });
+  </script>
+</body>
+</html>
